@@ -32,10 +32,12 @@ class pdf2png(argparse.Action):
         if(not('png' in os.listdir())):
             os.mkdir('png')
         for pdf_file in os.listdir(prospective_dir):
-            print(pdf_file)
-            image = convert_from_path(prospective_dir+"/"+pdf_file)
-            image[0].save("png/"+pdf_file[:len(pdf_file)-4]+".png")
-    
+            try:
+                image = convert_from_path(prospective_dir+"/"+pdf_file)
+                image[0].save("png/"+pdf_file[:len(pdf_file)-4]+".png")
+                print(pdf_file)
+            except:
+                continue
 
 def main():
     ldir = tempfile.mkdtemp()

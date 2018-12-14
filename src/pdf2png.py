@@ -21,6 +21,10 @@ import shutil
 import atexit
 from pdf2image import convert_from_path
 
+from progressbar import progressbar
+from joblib import Parallel, delayed
+import multiprocessing
+
 class pdf2png(argparse.Action):
     def __call__(self, parser, namespace, values, option_string=None):
         prospective_dir=values
@@ -31,13 +35,23 @@ class pdf2png(argparse.Action):
         # principal 
         if(not('png' in os.listdir())):
             os.mkdir('png')
-        for pdf_file in os.listdir(prospective_dir):
-            try:
-                image = convert_from_path(prospective_dir+"/"+pdf_file)
-                image[0].save("png/"+pdf_file[:len(pdf_file)-4]+".png")
-                print(pdf_file)
-            except:
-                continue
+        if not(multprocess):
+            for pdf_file in progressbar(os.listdir(prospective_dir)):
+                try:
+                    image = convert_from_path(prospective_dir+"/"+pdf_file)
+                    image[0].save("png/"+pdf_file[:len(pdf_file)-4]+".png")
+                except:
+                    continue
+        elif(multprocess):
+            def process():
+                try:
+                    image = convert_from_path(prospective_dir+"/"+pdf_file)
+                    image[0].save("png/"+pdf_file[:len(pdf_file)-4]+".png")
+                except:
+                    pass
+            num_cores = multiprocessing.cpu_count()
+            print('[INFO]Multprocess: {}'.format(num_cores))
+            Parallel(n_jobs=num_cores)(delayed(process)(pdf_file) for pdf_file in progressbar(os.listdir(prospective_dir)))
 
 def main():
     ldir = tempfile.mkdtemp()

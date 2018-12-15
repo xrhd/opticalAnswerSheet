@@ -32,6 +32,8 @@ class pdf2png(argparse.Action):
         print('outpath: \"local dir\"/png')
 
     def p2p(self, prospective_dir):
+        multprocess = True
+        
         # principal 
         if(not('png' in os.listdir())):
             os.mkdir('png')
@@ -43,14 +45,14 @@ class pdf2png(argparse.Action):
                 except:
                     continue
         elif(multprocess):
-            def process():
+            def process(pdf_file):
                 try:
                     image = convert_from_path(prospective_dir+"/"+pdf_file)
                     image[0].save("png/"+pdf_file[:len(pdf_file)-4]+".png")
                 except:
                     pass
             num_cores = multiprocessing.cpu_count()
-            print('[INFO]Multprocess: {}'.format(num_cores))
+            print('[INFO] Multprocess: {}'.format(num_cores))
             Parallel(n_jobs=num_cores)(delayed(process)(pdf_file) for pdf_file in progressbar(os.listdir(prospective_dir)))
 
 def main():
